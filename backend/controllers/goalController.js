@@ -12,7 +12,11 @@ const setGoals = (req,res) => {
     //console.log(req.body) is undefined initially
     //to make req.body work, we have to create a middleware at server.js
     if (!req.body.text) {
-          res.status(400).json({message: 'Please add a text field'})
+          //res.status(400).json({message: 'Please add a text field'})
+          //prefer express error handler instead of .json
+          res.status(400)
+          throw new Error('Please add a text field')
+
     }
     res.status(200).json({message: 'Set Goals!'})
  }
