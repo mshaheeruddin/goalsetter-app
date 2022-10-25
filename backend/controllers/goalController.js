@@ -8,7 +8,7 @@ const Goal = require('../model/goalModel')
 
 //Using async? -> When we use mongoose in each of these func to interact with DB we get a promise!
 const getGoals = asyncHandler(async (req,res) => {
-   const goals = await Goal.find()
+   const goals = await Goal.find({ user: req.user.id })
 
    res.status(200).json(goals) 
 })
@@ -27,7 +27,8 @@ const setGoals = asyncHandler(async (req,res) => {
 
     }
     const goal = await Goal.create({
-      text: req.body.text
+      text: req.body.text,
+      user: req.user.id
     })
 
 
@@ -43,6 +44,24 @@ const updateGoals = asyncHandler(async (req,res) => {
     if (!goal) {
       res.status(400)
       throw new Error('Goal not Found')
+    }
+
+    //Get User before finding and updating User
+    const user = await User.findById(req.user.id)
+    
+    //Check for User
+    if (!user) {
+        res.status(401)
+        throw new Error('User Not Found')
+    }
+    //Now, we dont want users updating each others goals
+    //Check for goals and goals must have user field on it 
+    //which is object id and turn it to string before checking it
+     
+    //In Short: Make sure the logged in user match the goal user
+    if(goal.user.toString() !== user.id) {
+         res.status(401)
+         throw new Error('User not authorized')
     }
 
     const updatedGoal = await Goal.findByIdAndUpdate(req.params.id, req.body, {
@@ -61,7 +80,23 @@ const deleteGoals = asyncHandler(async (req,res) => {
      res.status(400)
      throw new Error('Goal not Found')
    }
-
+//Get User before finding and updating User
+const user = await User.findById(req.user.id)
+    
+//Check for User
+if (!user) {
+    res.status(401)
+    throw new Error('User Not Found')
+}
+//Now, we dont want users deleting each others goals
+//Check for goals and goals must have user field on it 
+//which is object id and turn it to string before checking it
+ 
+//In Short: Make sure the logged in user match the goal user
+if(goal.user.toString() !== user.id) {
+     res.status(401)
+     throw new Error('User not authorized')
+}
   await goal.remove()
 
 

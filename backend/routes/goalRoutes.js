@@ -4,6 +4,8 @@ const router = express.Router()
 //{ Function to Call when We GET }
 const { getGoals, setGoals, updateGoals, deleteGoals } = require('../controllers/goalController')
 
+const {protect} = require('../middleware/authMiddleware')
+
 //callback functions -> exported to goalController.js File
 
 /*
@@ -13,7 +15,7 @@ router.post('/', setGoals)
 merged into this one function!
 
 */
-router.route('/').get(getGoals).post(setGoals)
+router.route('/').get(protect, getGoals).post(protect,setGoals)
 
 /*
 router.put('/:id', updateGoals)
@@ -23,7 +25,7 @@ merged into this one function!
 
 */
 
-router.route('/:id').put(updateGoals).delete(deleteGoals)
+router.route('/:id').put(protect, updateGoals).delete(protect, deleteGoals)
 
 
 module.exports = router 
